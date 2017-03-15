@@ -1,1 +1,1 @@
-# mailsort
+# mailsortThis is configuration for maildrop to handle spam checking and delivering to certain folders. Additionally, the mailsort.py is a script to enable sorting of mails based on rules and conditions.The maildrop configuration is mostly derived from [this excellent blog entry](https://blog.macfrog.de/2014/05/10/maildrop-revisited/) by MacFrog (Thorsten Köster).The mailsort.py functionality is based on [pymailsort](https://github.com/mnagel/pymailsort) by Michael Nagel.

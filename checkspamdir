@@ -1,0 +1,5 @@
+# check folder structure
+`test -d "$MAILDIR/.0 Spamfilter" || maildirmake "$MAILDIR/.0 Spamfilter"`
+`test -d "$MAILDIR/.0 Spamfilter.1 als Spam erkannt" || maildirmake "$MAILDIR/.0 Spamfilter.1 als Spam erkannt"`
+`test -d "$MAILDIR/.0 Spamfilter.2 als Spam lernen" || maildirmake "$MAILDIR/.0 Spamfilter.2 als Spam lernen"`
+`test -d "$MAILDIR/.0 Spamfilter.3 als Ham lernen" || maildirmake "$MAILDIR/.0 Spamfilter.3 als Ham lernen"`

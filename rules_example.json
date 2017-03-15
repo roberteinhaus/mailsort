@@ -1,0 +1,47 @@
+{
+    "_description": {
+        "available_headers": "From, To, Subject, Date, ..."
+    },
+    "rules": [{
+        "name": "Filter by multiple conditions",
+        "action": {
+            "destdir": "dir1",
+            "mark_read": false
+        },
+        "conditions": [{
+            "header": "To",
+            "regex": "test@example.com",
+            "ignorecase": true
+        }, {
+            "header": "Subject",
+            "regex": "Matching subject",
+            "ignorecase": false
+        }, {
+            "header": "From",
+            "regex": "sender@example.com",
+            "ignorecase": true
+        }]
+    }, {
+        "name": "Rule Nr 2",
+        "action": {
+            "destdir": "dir2",
+            "mark_read": false
+        },
+        "conditions": [{
+            "header": "From",
+            "regex": "mail@example.com",
+            "ignorecase": true
+        }]
+    }, {
+        "name": "Work Mails",
+        "action": {
+            "destdir": "Work",
+            "mark_read": true
+        },
+        "conditions": [{
+            "header": "From",
+            "regex": "work@example.com",
+            "ignorecase": true
+        }]
+    }]
+}

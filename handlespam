@@ -1,0 +1,32 @@
+# Handle Spam. Take care of re-trained messages from dspam-learn.
+import REDELIVER_SPAM
+if ( $REDELIVER_SPAM )
+{
+    DESTDIR="$MAILDIR/.0 Spamfilter.1 als Spam erkannt"
+    MARK_READ=$SILENT_SPAM
+    include "$HOME/.mailsort/deliver"
+}
+
+import REDELIVER_HAM
+if ( ! $REDELIVER_HAM )
+{
+    if ( $SPAMASSASSIN_ENABLE )
+    {
+        # show the mail to SpamAssassin
+        xfilter "/usr/bin/spamc"
+    }
+
+    if ( $DSPAM_ENABLE )
+    {
+        # now show the mail to DSPAM
+        xfilter "/package/host/localhost/dspam/bin/dspam --mode=teft --deliver=innocent,spam --stdout"
+    }
+
+    # process SPAM
+    if (( /^X-Spam-Level: \*{$SPAMASSASSIN_SPAMSCORE,}$/ || /^X-DSPAM-Result: Spam/) && ( ! /^X-DSPAM-Result: Whitelisted/ ))
+    {
+        DESTDIR="$MAILDIR/.0 Spamfilter.1 als Spam erkannt"
+        MARK_READ=$SILENT_SPAM
+        include "$HOME/.mailsort/deliver"
+    }
+}

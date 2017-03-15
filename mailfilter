@@ -1,0 +1,29 @@
+# Configuration
+
+WRITELOG="1"
+SPAMASSASSIN_ENABLE="1"
+SPAMASSASSIN_SPAMSCORE="5"
+DSPAM_ENABLE="1"
+SILENT_SPAM="1"
+MARK_READ="0"
+
+# ------------------------------------------------------
+
+# Write log file, if desrired. Set Maildir. Check Spamdir. Handle Spam.
+include "$HOME/.mailsort/writelog"
+include "$HOME/.mailsort/checkmaildir"
+include "$HOME/.mailsort/checkspamdir"
+include "$HOME/.mailsort/handlespam"
+ 
+# ------------------------------------------------------
+
+# Start the mailsort
+MAILSORT=`python $HOME/.mailsort/mailsort.py --logfile $LOGFILENAME --rules $HOME/.mailsort_rules/rules_$EXT.json`
+SORTDIR=`echo "$MAILSORT" | cut -d';' -f2`
+MARK_READ=`echo "$MAILSORT" | cut -d';' -f1`
+DESTDIR="$MAILDIR/$SORTDIR"
+
+# ------------------------------------------------------
+
+# Finally, deliver mail
+include "$HOME/.mailsort/deliver"
