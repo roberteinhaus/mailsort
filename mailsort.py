@@ -32,7 +32,7 @@ def compile_regexes(conditions):
 def load_rules():
     # load rules from file
     with open(RULES) as rules_file:
-        return json.load(rules_file)['rules']
+        return json.load(rules_file)
 
 
 def process_mail(mailfile):
@@ -44,6 +44,8 @@ def process_mail(mailfile):
         rules = load_rules()
 
         for rule in rules:
+            if not rule['active']:
+                continue
             # Compile all conditions for this rule.
             regexes = compile_regexes(rule['conditions'])
 
