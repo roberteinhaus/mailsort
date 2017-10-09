@@ -44,31 +44,32 @@ def process_mail(mailfile):
         rules = load_rules()
 
         for rule in rules:
+            match = True
+            tested = False
+
             if not rule['active']:
                 continue
+
+            log("testing rule '%s'" % rule['name'])
             # Compile all conditions for this rule.
             regexes = compile_regexes(rule['conditions'])
 
-            match = True
-            tested = False
-            for part in msg.walk():
-                for headername, value in part.items():
-                    for header, compiledre in regexes:
-                        if headername == header:
-                            tested = True
-                            if compiledre.match(value) is None:
-                                # At this point, we tested a header
-                                # with no match, so the rule in general
-                                # will not match and we can stop here testing
-                                # for this rule.
-                                match = False
-                                break
-                    if not match:
-                        # Skip this rule, because it will not match.
-                        break
-                if not match:
-                    # Skip this rule, because it will not match.
+            for header, compiledre in regexes:
+                tested = True
+                try:
+                    value = msg[header]
+                except Exception as e:
+                    tested = False
+                    log("header '$s' not found!" % header)
                     break
+                if compiledre.match(value) is None:
+                    match = False
+                    log("NO match for header '%s' with value '%s'" %
+                        (header, value))
+                    break
+                else:
+                    log("header '%s' matches with value '%s'" % (header, value))
+
             # We check for 'tested' and 'match' to be sure we checked
             # something and did not encouter a no-match.
             # If we would omit the 'tested' here, a faulty rule could lead to
@@ -134,6 +135,7 @@ def main(args, mailfile):
     else:
         log("no rules provided, we can't sort anything")
         return DEFAULTDIR
+
 
 if __name__ == '__main__':
     mailbox = main(sys.argv[1:], sys.stdin)
