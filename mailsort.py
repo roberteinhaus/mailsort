@@ -11,6 +11,7 @@ from optparse import OptionParser
 
 LOGFILE = None
 RULES = None
+VERBOSE = False
 DEFAULTDIR = ""
 
 
@@ -37,7 +38,7 @@ def load_rules():
 
 def process_mail(mailfile):
     try:
-        log("checking new mail")
+        log("checking new mail", 'INFO')
         msg = email.message_from_file(mailfile)
 
         # Load rules from file.
@@ -50,7 +51,7 @@ def process_mail(mailfile):
             if not rule['active']:
                 continue
 
-            log("testing rule '%s'" % rule['name'])
+            log("testing rule '%s'" % rule['name'], 'DEBUG')
             # Compile all conditions for this rule.
             regexes = compile_regexes(rule['conditions'])
 
@@ -60,15 +61,16 @@ def process_mail(mailfile):
                     value = msg[header]
                 except Exception as e:
                     tested = False
-                    log("header '$s' not found!" % header)
+                    log("header '$s' not found!" % header, 'DEBUG')
                     break
                 if compiledre.match(value) is None:
                     match = False
                     log("NO match for header '%s' with value '%s'" %
-                        (header, value))
+                        (header, value), 'DEBUG')
                     break
                 else:
-                    log("header '%s' matches with value '%s'" % (header, value))
+                    log("header '%s' matches with value '%s'" %
+                        (header, value), 'DEBUG')
 
             # We check for 'tested' and 'match' to be sure we checked
             # something and did not encouter a no-match.
@@ -79,27 +81,31 @@ def process_mail(mailfile):
             if tested and match:
                 action = rule['action']
                 log("move mail to '%s' because rule '%s' matches" %
-                    (action['destdir'], rule['name']))
+                    (action['destdir'], rule['name']), 'INFO')
                 if action['mark_read']:
                     mark_read = "1"
-                    log("mark mail as read")
+                    log("mark mail as read", 'INFO')
                 else:
                     mark_read = "0"
                 return mark_read + ";." + action['destdir']
     # At this point we did not return with a match, so either something went
     # wrong, or we simply had no matching rule
     except Exception as e:
-        log(e)
+        log(e, 'ERROR')
     else:
-        log("no matching filter found")
+        log("no matching filter found", 'WARNING')
     return DEFAULTDIR
 
 
-def log(line):
+def log(line, severity='INFO'):
     if LOGFILE is not None:
-        with open(LOGFILE, 'a') as logfile:
-            timestamp = datetime.datetime.now().isoformat()
-            logfile.write("%s %s\n" % (timestamp, line))
+        if (severity == 'ERROR'
+                or severity == 'WARNING'
+                or severity == 'INFO'
+                or VERBOSE):
+            with open(LOGFILE, 'a') as logfile:
+                timestamp = datetime.datetime.now().isoformat()
+                logfile.write("%s %s\n" % (timestamp, line))
 
 
 def main(args, mailfile):
@@ -109,6 +115,7 @@ def main(args, mailfile):
 
     global LOGFILE
     global RULES
+    global VERBOSE
 
     parser.add_option("--logfile",
                       dest="logfile",
@@ -122,7 +129,13 @@ def main(args, mailfile):
                       help="rules",
                       default=None
                       )
+    parser.add_option("-v",
+                      dest="verbose",
+                      action="store_true"
+                      )
     (options, args) = parser.parse_args(args)
+
+    VERBOSE = options.verbose
 
     LOGFILE = options.logfile
     if LOGFILE is not None:
